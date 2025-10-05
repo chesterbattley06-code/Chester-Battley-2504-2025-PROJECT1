@@ -134,21 +134,38 @@ Show a polynomial.
 """
 function show(io::IO, p::Polynomial)
     if iszero(p)
-        print(io,"0")
+        print(io, "0")
     else
-        n = length(p)
-        for (i,t) in enumerate(p)
-            if !iszero(t)
-                if t.degree == 0
-                    print(io, t.coeff)
-                    if i != n
-                        print(io, " + ")
-                    end
+        terms_list = filter(t -> !iszero(t), collect(p))
+        
+        sort!(terms_list, by = t -> t.degree, rev = true)
+        
+        for (idx, t) in enumerate(terms_list)
+            if idx > 1
+                if t.coeff < 0
+                    print(io, " - ")
                 else
-                    print(io, t)
-                    if i != n
-                        print(io, " + ")
-                    end
+                    print(io, " + ")
+                end
+            elseif t.coeff < 0
+                print(io, "-")
+            end
+            
+            abs_coeff = abs(t.coeff)
+            
+            if t.degree == 0
+                print(io, abs_coeff)
+            elseif t.degree == 1
+                if abs_coeff == 1
+                    print(io, "x")
+                else
+                    print(io, abs_coeff, "x")
+                end
+            else
+                if abs_coeff == 1
+                    print(io, "x^", t.degree)
+                else
+                    print(io, abs_coeff, "x^", t.degree)
                 end
             end
         end
