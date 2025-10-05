@@ -139,10 +139,16 @@ function show(io::IO, p::Polynomial)
         n = length(p)
         for (i,t) in enumerate(p)
             if !iszero(t)
-                if degree(t) == 0
-                    print(io, coefficient(t), i != n ? " + " : "")
+                if t.degree == 0
+                    print(io, t.coeff)
+                    if i != n
+                        print(io, " + ")
+                    end
                 else
-                    print(io, t, i != n ? " + " : "")
+                    print(io, t)
+                    if i != n
+                        print(io, " + ")
+                    end
                 end
             end
         end
