@@ -39,14 +39,13 @@ We assume that at least the following two constructors exist for a given concret
 We assume also that for any concrete subtype of Polynomial, no zero term is stored with degree higher
 than the leading term (ie, we do not store 1 + 2x + x^2 + 0x^3 + 0x^7)
 """
-abstract type Polynomial end
+abstract type Polynomial{C, D} end
 
 """
 This function maintains the invariant of the Polynomial type so that there are no zero terms beyond the highest
 non-zero term.
 """
-function trim!(p::Polynomial)::Polynomial
-    # We stop if the leading term has a non-zero coefficient or the polynomial is the zero polynomial
+function trim!(p::Polynomial{C, D})::Polynomial{C, D} where {C, D}
     while iszero(leading(p)) && !iszero(p)
         pop!(p)
     end
@@ -57,54 +56,33 @@ end
 # Abstract Constructors #
 #########################
 
-"""
-Construct a polynomial with a single term.
-"""
-function (::Type{P})(t::Term)::P where {P <: Polynomial}
+function (::Type{P})(t::Term{C, D})::P where {C, D, P <: Polynomial{C, D}}
     return P([t])
 end
 
-"""
-Construct a polynomial of the form x^p-x.
-"""
-function cyclotonic_polynomial(::Type{P}, p::Int)::P where {P <: Polynomial}
-    return P([Term(1,p), Term(-1,0)])
+function cyclotonic_polynomial(::Type{P}, p::Int)::P where {C, D, P <: Polynomial{C, D}}
+    return P([Term(one(C), D(p)), Term(-one(C), zero(D))])
 end
 
-"""
-Construct a polynomial of the form x-n.
-"""
-function linear_monic_polynomial(::Type{P}, n)::P where {P <: Polynomial} 
-    return P([Term(1,1), Term(-n,0)])
+function linear_monic_polynomial(::Type{P}, n::C)::P where {C, D, P <: Polynomial{C, D}} 
+    return P([Term(one(C), one(D)), Term(-n, zero(D))])
 end
 
-"""
-Construct a polynomial of the form x.
-"""
-function x_poly(::Type{P})::P where {P <: Polynomial} 
-    return P([Term(1,1)])
+function x_poly(::Type{P})::P where {C, D, P <: Polynomial{C, D}} 
+    return P([Term(one(C), one(D))])
 end
-x_poly(p::P) where {P <: Polynomial} = x_poly(P)
+x_poly(p::P) where {C, D, P <: Polynomial{C, D}} = x_poly(P)
 
-"""
-Creates the zero polynomial.
-"""
-function zero(::Type{P})::P where {P <: Polynomial} 
+function zero(::Type{P})::P where {C, D, P <: Polynomial{C, D}} 
     return P()
 end
-zero(p::P) where {P <: Polynomial} = zero(P)
+zero(p::P) where {C, D, P <: Polynomial{C, D}} = zero(P)
 
-"""
-Creates the unit polynomial.
-"""
-function one(::Type{P})::P where {P <: Polynomial} 
-    return P(one(Term{Int, Int}))
+function one(::Type{P})::P where {C, D, P <: Polynomial{C, D}} 
+    return P(one(Term{C, D}))
 end
-one(p::P) where {P <: Polynomial} = one(P)
+one(p::P) where {C, D, P <: Polynomial{C, D}} = one(P)
 
-"""
-Generates a random polynomial.
-"""
 function rand(::Type{P} ; 
                 degree::Int = -1, 
                 terms::Int = -1, 
@@ -112,7 +90,7 @@ function rand(::Type{P} ;
                 mean_degree::Float64 = 5.0,
                 prob_term::Float64  = 0.7,
                 monic = false,
-                condition = (p)->true) where {P <: Polynomial}
+                condition = (p)->true) where {C, D, P <: Polynomial{C, D}}
         
     while true 
         _degree = degree == -1 ? rand(Poisson(mean_degree)) : degree
@@ -120,7 +98,7 @@ function rand(::Type{P} ;
         degrees = vcat(sort(sample(0:_degree-1,_terms,replace = false)),_degree)
         coeffs = rand(1:max_coeff,_terms+1)
         monic && (coeffs[end] = 1)
-        p = P( [Term(coeffs[i],degrees[i]) for i in 1:length(degrees)] )
+        p = P( [Term(C(coeffs[i]), D(degrees[i])) for i in 1:length(degrees)] )
         condition(p) && return p
     end
 end
@@ -182,7 +160,7 @@ This implements the iteration interface.
 
 This must be overridden by concrete subtypes.
 """
-function iterate(p::Polynomial, state=1)
+function iterate(p::Polynomial{C, D}, state=1) where {C, D}
     not_implemented_error(p, "iterate")
 end
 
@@ -214,21 +192,21 @@ leading(p::Polynomial) = not_implemented_error(p, "leading")
 """
 Returns the coefficients of the polynomial.
 """
-function coeffs(p::Polynomial)::Vector{Integer} 
+function coeffs(p::Polynomial{C, D})::Vector{C} where {C, D}
     [t.coeff for t in p]
 end
 
 """
 The degree of the polynomial.
 """
-function degree(p::Polynomial)::Integer 
+function degree(p::Polynomial{C, D})::D where {C, D}
     leading(p).degree 
 end
 
 """
 The content of the polynomial is the GCD of its coefficients.
 """
-function content(p::Polynomial)::Integer 
+function content(p::Polynomial{C, D})::C where {C <: Integer, D}
     euclid_alg(coeffs(p))
 end
 
@@ -250,7 +228,7 @@ polynomial. However, the exact implementation details are up to you.
 
 This must be overridden by concrete subtypes.
 """
-function push!(p::Polynomial, t::Term) 
+function push!(p::Polynomial{C, D}, t::Term{C, D}) where {C, D}
     not_implemented_error(p, "push!")
 end
 
@@ -262,15 +240,15 @@ created).
 
 This must be overridden by concrete subtypes.
 """
-function pop!(p::Polynomial)::Term 
+function pop!(p::Polynomial{C, D})::Term{C, D} where {C, D}
     not_implemented_error(p, "pop")
 end
 
 """
 Check if the polynomial is zero.
 """
-function iszero(p::Polynomial)::Bool 
-    iszero(leading(p)) && (degree(p) == 0)
+function iszero(p::Polynomial{C, D})::Bool where {C, D}
+    iszero(leading(p)) && (degree(p) == zero(D))
 end
 
 #################################################################
@@ -280,14 +258,14 @@ end
 """
 The negative of a polynomial.
 """
-function -(p::P) where {P <: Polynomial} 
+function -(p::P) where {C, D, P <: Polynomial{C, D}}
     P(map((pt)->-pt, p))
 end
 
 """
 Create a new polynomial which is the derivative of the polynomial.
 """
-function derivative(p::P)::P where {P <: Polynomial} 
+function derivative(p::P)::P where {C, D, P <: Polynomial{C, D}}
     der_p = P()
     for term in p
         der_term = derivative(term)
@@ -302,23 +280,22 @@ E.g.,
     f = 6x^3 + 6x^2 + 9x + 12
     prim_part(f) = 2x^3 + 2x^2 + 3x + 4
 """
-function prim_part(f::P) where {P <: Polynomial}
+function prim_part(f::P) where {C <: Integer, D, P <: Polynomial{C, D}}
     iszero(f) && return f
-    content = gcd(map(t -> t.coeff, f))
-    return P( map(t -> Term(t.coeff ÷ content, t.degree), f) ) # Exact integer division
+    content_val = gcd(map(t -> t.coeff, f))
+    return P( map(t -> Term(t.coeff ÷ content_val, t.degree), f) )
 end
 
 """
 A square free polynomial modulo a prime.
 """
-function square_free_mod_p(f::P, prime::Integer) where {P <: Polynomial}
+function square_free_mod_p(f::P, prime::Integer) where {C, D, P <: Polynomial{C, D}}
     fmod_p = mod(f, prime)
 
     min_deg = last(fmod_p).degree
     vt = filter(t -> !iszero(t), collect(fmod_p))
     fmod_p = P( map(t -> Term(t.coeff, t.degree - min_deg), vt) )
 
-    # Now compute the gcd modulo a prime
     der_fmod_p = mod(derivative(fmod_p), prime)
     gcd_f_der_f = gcd_mod_p(fmod_p, der_fmod_p, prime)
 
@@ -326,7 +303,6 @@ function square_free_mod_p(f::P, prime::Integer) where {P <: Polynomial}
 
     sqr_free = div_mod_p(fmod_p, gcd_f_der_f, prime)
 
-    # Add the factor of `x` back in if there was one
     if min_deg > zero(min_deg) 
         sqr_free *= x_poly(P)
     end
@@ -341,7 +317,7 @@ end
 """
 Check if two polynomials are the same.
 """
-function ==(p1::P, p2::P)::Bool where {P <: Polynomial}
+function ==(p1::P, p2::P)::Bool where {C, D, P <: Polynomial{C, D}}
     if length(p1) != length(p2)
         return false
     end
@@ -364,14 +340,14 @@ end
 """
 Subtraction of two polynomials (of the same concrete subtype).
 """
-function -(p1::P, p2::P)::P where {P <: Polynomial} 
+function -(p1::P, p2::P)::P where {C, D, P <: Polynomial{C, D}}
     return p1 + (-p2)
 end
 
 """
 Multiplication of polynomial and term.
 """
-function *(t::Term, p::P)::P where {P <: Polynomial} 
+function *(t::Term{C, D}, p::P)::P where {C, D, P <: Polynomial{C, D}}
     return iszero(t) ? P() : P(map((pt)->t*pt, p))
 end
 *(p::Polynomial, t::Term)::Polynomial = t*p
@@ -387,14 +363,14 @@ Integer division of a polynomial by an integer modulo a prime.
 
 Warning this may not make sense if n does not divide all the coefficients of p.
 """
-function div_mod_p(p::P, n::Integer, prime::Integer) where {P <: Polynomial}
+function div_mod_p(p::P, n::Integer, prime::Integer) where {C, D, P <: Polynomial{C, D}}
     P( map((pt)->(div_mod_p(pt, n, prime)), p) )
 end
 
 """
 Take the mod of a polynomial with an integer.
 """
-function mod(f::P, p::Int)::P where {P <: Polynomial}
+function mod(f::P, p::Int)::P where {C, D, P <: Polynomial{C, D}}
     f_out = P()
     for t in f
         new_t = mod(t, p)
@@ -406,7 +382,7 @@ end
 """
 Power of a polynomial mod prime.
 """
-function pow_mod(p::P, n::Int, prime::Int) where {P <: Polynomial}
+function pow_mod(p::P, n::Int, prime::Int) where {C, D, P <: Polynomial{C, D}}
     n < 0 && error("No negative power")
 
     out = one(p)

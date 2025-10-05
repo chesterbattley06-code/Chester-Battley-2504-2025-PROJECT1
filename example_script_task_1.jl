@@ -4,7 +4,7 @@ Pkg.activate(".")
 
 include("poly_factorization_project.jl")
 
-x = x_poly(PolynomialDense)
+x = x_poly(PolynomialDense{Int, Int})
 println("Constructing polynomials f, g, h using PolynomialDense:")
 @show f = x^2 - 2x
 @show g = 2x^3 + 3x^2 + (-3)

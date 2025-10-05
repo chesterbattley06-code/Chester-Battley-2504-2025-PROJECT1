@@ -6,22 +6,7 @@
 #############################################################################
 #############################################################################
 
-"""  Modular algorithm.
-f divide by g
-
-f = q*g + r
-
-p is a prime
-
-Returns quotient and remainder (q, r)
-
-Precondition: 
-    1) degree(num) == degree(mod(num, prime))
-    2) mod(den, prime) != 0
-
-Note: clearly a monic polynomial will satisfy 1) in Zp for any field.
-"""
-function div_rem_mod_p(num::P, den::P, prime::Integer)::Tuple{P, P} where {P <: Polynomial}
+function div_rem_mod_p(num::P, den::P, prime::Integer)::Tuple{P, P} where {C, D, P <: Polynomial{C, D}}
     f, g = mod(num,prime), mod(den,prime)
     @assert degree(num) == degree(mod(num, prime))
     iszero(g) && throw(DivideError())
@@ -29,7 +14,7 @@ function div_rem_mod_p(num::P, den::P, prime::Integer)::Tuple{P, P} where {P <: 
     q = P()
     prev_degree = degree(f)
     while degree(f) ≥ degree(g) 
-        h = P( div_mod_p(leading(f), leading(g), prime) )  #syzergy 
+        h = P( div_mod_p(leading(f), leading(g), prime) )
         f = mod((f - h*g), prime)
         q = mod((q + h), prime)  
         prev_degree == degree(f) && break
@@ -39,12 +24,6 @@ function div_rem_mod_p(num::P, den::P, prime::Integer)::Tuple{P, P} where {P <: 
     return q, f
 end
 
-"""
-The quotient from polynomial division modulo a prime. 
-"""
-div_mod_p(num::P, den::P, prime::Integer) where {P <: Polynomial} = first(div_rem_mod_p(num, den, prime))
+div_mod_p(num::P, den::P, prime::Integer) where {C, D, P <: Polynomial{C, D}} = first(div_rem_mod_p(num, den, prime))
 
-"""
-The remainder from polynomial division modulo a prime.
-"""
-rem_mod_p(num::P, den::P, prime::Integer) where {P <: Polynomial} = last(div_rem_mod_p(num, den, prime))
+rem_mod_p(num::P, den::P, prime::Integer) where {C, D, P <: Polynomial{C, D}} = last(div_rem_mod_p(num, den, prime))
