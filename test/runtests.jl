@@ -59,6 +59,15 @@ end
 println("---END POWER UNIT TESTS---\n")
 
 ####
+# Execute unit tests for ZModP
+####
+include("z_mod_p_test.jl")
+primes_to_test = [5, 7, 11, 17, 101, 1009]  # At least one prime > 1000
+println("---BEGIN ZMODP UNIT TESTS---")
+test_zmodp_operations(primes_to_test)
+println("---END ZMODP UNIT TESTS---\n")
+
+####
 # Execute unit tests for polynomial factorization
 ####
 include("factorization_test.jl")

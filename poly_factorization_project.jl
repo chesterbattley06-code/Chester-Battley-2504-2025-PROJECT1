@@ -12,6 +12,7 @@ import Base: %, gcd
 import Base: push!, pop!, iszero, show, isless, map, map!, iterate, length, last, isempty
 import Base: +, -, *, mod, %, ÷, ==, ^, rand, div, rem, zero, one
 
+include("src/z_mod_p.jl")
 include("src/term.jl")
 
 # Utilities

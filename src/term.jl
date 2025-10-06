@@ -188,3 +188,16 @@ end
 
 """ Enable broadcasting an operation on a term """
 broadcastable(t::Term) = Ref(t)
+
+# Division for ZModP coefficients
+function ÷(t1::Term{ZModP{T, N}, D}, t2::Term{ZModP{T, N}, D})::Term{ZModP{T, N}, D} where {T <: Integer, N, D}
+    return Term(t1.coeff ÷ t2.coeff, t1.degree - t2.degree)
+end
+
+# Refactor div_mod_p to use ZModP
+function div_mod_p(t::Term{C, D}, n::Integer, prime::Integer) where {C <: Integer, D}
+    # Convert to ZModP, divide, convert back
+    t_mod = Term(ZModP(t.coeff, Val(prime)), t.degree)
+    result_mod = t_mod ÷ Term(ZModP(C(n), Val(prime)), zero(D))
+    return Term(C(result_mod.coeff), result_mod.degree)
+end
