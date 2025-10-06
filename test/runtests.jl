@@ -2,7 +2,7 @@
 #############################################################################
 #
 # A script that runs all unit tests in the project.
-#                                                                               
+#
 #############################################################################
 #############################################################################
 
@@ -28,11 +28,11 @@ println("---BEGIN HEAP UNIT TESTS---")
 test_heap()
 println("---END HEAP UNIT TESTS---\n")
 
-# ####
-# # Execute unit tests for polynomials
-# ####
+####
+# Execute unit tests for polynomials
+####
 include("polynomials_test.jl")
-polynomial_types = [PolynomialDense] # The types of polynomials to unit test
+polynomial_types = [PolynomialDense{Int, Int}, PolynomialDense{BigInt, Int}]
 println("---BEGIN POLYNOMIAL UNIT TESTS---\n")
 for poly in polynomial_types
     println("Type of `Polynomial`: $(poly)")
@@ -48,10 +48,10 @@ println("---END POLYNOMIAL UNIT TESTS---\n")
 # Execute unit tests for polynomial factorization
 ####
 include("factorization_test.jl")
-polynomial_types = [PolynomialDense] # The types of polynomials to unit test factorisation
+polynomial_types = [PolynomialDense{Int, Int}, PolynomialDense{BigInt, Int}]
 println("---BEGIN FACTORIZATION UNIT TESTS---\n")
 for poly in polynomial_types
-    println("Type of `Polynomial``: $(poly)")
+    println("Type of `Polynomial`: $(poly)")
     factor_mod_p_test_poly(poly)
     println("")
 end

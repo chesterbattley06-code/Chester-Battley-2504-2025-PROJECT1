@@ -9,41 +9,61 @@ println("Maximum Int value: ", typemax(Int), "\n")
 
 # Example 1: Close to max Int
 println("Example 1:")
-p1 = PolynomialDense([Term(9000000000000000000, 0)])
-p2 = PolynomialDense([Term(9000000000000000000, 0)])
-p_sum1 = p1 + p2
-println("With Int: 9000000000000000000 + 9000000000000000000 = ", p_sum1)
-println("Expected: 18000000000000000000 (will overflow)\n")
+p1_int = PolynomialDense{Int, Int}([Term(9000000000000000000, 0)])
+p2_int = PolynomialDense{Int, Int}([Term(9000000000000000000, 0)])
+p_sum1_int = p1_int + p2_int
+println("With Int: ", p_sum1_int, " (overflows)")
+
+p1_big = PolynomialDense{BigInt, Int}([Term(BigInt(9000000000000000000), 0)])
+p2_big = PolynomialDense{BigInt, Int}([Term(BigInt(9000000000000000000), 0)])
+p_sum1_big = p1_big + p2_big
+println("With BigInt: ", p_sum1_big, " (correct: 18000000000000000000)\n")
 
 # Example 2
 println("Example 2:")
-p3 = PolynomialDense([Term(5000000000000000000, 1)])
-p4 = PolynomialDense([Term(5000000000000000000, 1)])
-p_sum2 = p3 + p4
-println("With Int: 5000000000000000000x + 5000000000000000000x = ", p_sum2)
-println("Expected: 10000000000000000000x (will overflow)\n")
+p3_int = PolynomialDense{Int, Int}([Term(5000000000000000000, 1)])
+p4_int = PolynomialDense{Int, Int}([Term(5000000000000000000, 1)])
+p_sum2_int = p3_int + p4_int
+println("With Int: ", p_sum2_int, " (overflows)")
+
+p3_big = PolynomialDense{BigInt, Int}([Term(BigInt(5000000000000000000), 1)])
+p4_big = PolynomialDense{BigInt, Int}([Term(BigInt(5000000000000000000), 1)])
+p_sum2_big = p3_big + p4_big
+println("With BigInt: ", p_sum2_big, " (correct: 10000000000000000000x)\n")
 
 # Example 3: Max Int + 1
 println("Example 3:")
 max_int = typemax(Int)
-p5 = PolynomialDense([Term(max_int, 0)])
-p6 = PolynomialDense([Term(1, 0)])
-p_sum3 = p5 + p6
-println("With Int: ", max_int, " + 1 = ", p_sum3)
-println("Expected: ", big(max_int) + 1, " (will overflow to negative)\n")
+p5_int = PolynomialDense{Int, Int}([Term(max_int, 0)])
+p6_int = PolynomialDense{Int, Int}([Term(1, 0)])
+p_sum3_int = p5_int + p6_int
+println("With Int: ", p_sum3_int, " (overflows to negative)")
+
+p5_big = PolynomialDense{BigInt, Int}([Term(BigInt(max_int), 0)])
+p6_big = PolynomialDense{BigInt, Int}([Term(BigInt(1), 0)])
+p_sum3_big = p5_big + p6_big
+println("With BigInt: ", p_sum3_big, " (correct: ", BigInt(max_int) + 1, ")\n")
 
 # Example 4
 println("Example 4:")
-p7 = PolynomialDense([Term(7000000000000000000, 0), Term(7000000000000000000, 2)])
-p8 = PolynomialDense([Term(7000000000000000000, 0), Term(7000000000000000000, 2)])
-p_sum4 = p7 + p8
-println("With Int: (7×10^18 + 7×10^18x^2) + (7×10^18 + 7×10^18x^2) = ", p_sum4)
-println("Expected: 14×10^18 + 14×10^18x^2 (will overflow)\n")
+p7_int = PolynomialDense{Int, Int}([Term(7000000000000000000, 0), Term(7000000000000000000, 2)])
+p8_int = PolynomialDense{Int, Int}([Term(7000000000000000000, 0), Term(7000000000000000000, 2)])
+p_sum4_int = p7_int + p8_int
+println("With Int: ", p_sum4_int, " (overflows)")
+
+p7_big = PolynomialDense{BigInt, Int}([Term(BigInt(7000000000000000000), 0), Term(BigInt(7000000000000000000), 2)])
+p8_big = PolynomialDense{BigInt, Int}([Term(BigInt(7000000000000000000), 0), Term(BigInt(7000000000000000000), 2)])
+p_sum4_big = p7_big + p8_big
+println("With BigInt: ", p_sum4_big, " (correct)\n")
 
 # Example 5
 println("Example 5:")
-p9 = PolynomialDense([Term(8000000000000000000, 1)])
-p10 = PolynomialDense([Term(8000000000000000000, 1)])
-p_sum5 = p9 + p10
-println("With Int: 8×10^18x + 8×10^18x = ", p_sum5)
-println("Expected: 16×10^18x (will overflow)\n")
+p9_int = PolynomialDense{Int, Int}([Term(8000000000000000000, 1)])
+p10_int = PolynomialDense{Int, Int}([Term(8000000000000000000, 1)])
+p_sum5_int = p9_int + p10_int
+println("With Int: ", p_sum5_int, " (overflows)")
+
+p9_big = PolynomialDense{BigInt, Int}([Term(BigInt(8000000000000000000), 1)])
+p10_big = PolynomialDense{BigInt, Int}([Term(BigInt(8000000000000000000), 1)])
+p_sum5_big = p9_big + p10_big
+println("With BigInt: ", p_sum5_big, " (correct: 16000000000000000000x)\n")
