@@ -45,6 +45,20 @@ end
 println("---END POLYNOMIAL UNIT TESTS---\n")
 
 ####
+# Execute unit tests for power operations
+####
+include("power_test.jl")
+polynomial_types = [PolynomialDense{Int, Int}, PolynomialSparse{Int, Int}]
+println("---BEGIN POWER UNIT TESTS---\n")
+for poly in polynomial_types
+    println("Type of `Polynomial`: $(poly)")
+    power_test_poly(poly)
+    pow_mod_test_poly(poly)
+    println("")
+end
+println("---END POWER UNIT TESTS---\n")
+
+####
 # Execute unit tests for polynomial factorization
 ####
 include("factorization_test.jl")

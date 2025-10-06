@@ -387,11 +387,6 @@ function ^(p::P, n::Integer)::P where {C, D, P <: Polynomial{C, D}}
     iszero(p) && return zero(p)
     p == one(p) && return one(p)
     
-    # Check if p is x (monomial of degree 1 with coefficient 1)
-    if length(p) == 1 && degree(p) == one(D) && leading(p).coeff == one(C)
-        return P([Term(one(C), D(n))])  # x^n = x^n
-    end
-    
     # Repeated squaring for general case
     result = one(p)
     base = p
@@ -414,27 +409,21 @@ Power of a polynomial mod prime.
 function pow_mod(p::P, n::Int, prime::Int) where {C, D, P <: Polynomial{C, D}}
     n < 0 && error("No negative power")
     
-    # Special cases - O(1) construction
+    # Special cases
     n == 0 && return one(p)
     iszero(mod(p, prime)) && return zero(p)
     mod(p, prime) == one(p) && return one(p)
     
-    # Check if p is x modulo prime
-    p_mod = mod(p, prime)
-    if length(p_mod) == 1 && degree(p_mod) == one(D) && leading(p_mod).coeff == one(C)
-        return P([Term(one(C), D(n))])
-    end
-    
     # Repeated squaring with mod
     result = one(p)
-    base = mod(p, prime)
+    base = trim!(mod(p, prime))
     exp = n
     
     while exp > 0
         if exp % 2 == 1
-            result = mod(result * base, prime)
+            result = trim!(mod(result * base, prime))
         end
-        base = mod(base * base, prime)
+        base = trim!(mod(base * base, prime))
         exp ÷= 2
     end
     
