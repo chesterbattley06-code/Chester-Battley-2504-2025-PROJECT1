@@ -1,4 +1,4 @@
-## Task 1.1 (Create Example Scripts)
+## Example script task 1
 using Pkg
 Pkg.activate(".")
 

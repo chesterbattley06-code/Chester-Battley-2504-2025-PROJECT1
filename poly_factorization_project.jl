@@ -39,4 +39,10 @@ include("src/polynomial_definitions/polynomial_sparse.jl")
 
 include("src/polynomial_factorization/factor.jl")
 
+# Sparse
+include("src/basic_polynomial_operations/sparse/polynomial_addition.jl")
+include("src/basic_polynomial_operations/sparse/polynomial_multiplication.jl")
+include("src/basic_polynomial_operations/sparse/polynomial_division.jl")
+include("src/basic_polynomial_operations/sparse/polynomial_gcd.jl")
+
 nothing

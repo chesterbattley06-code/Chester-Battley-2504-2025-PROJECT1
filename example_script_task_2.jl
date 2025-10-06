@@ -1,4 +1,4 @@
-## Task 2.1 (Showing overflow for PolynomialDense)
+## Example script task 2
 using Pkg
 Pkg.activate(".")
 
