@@ -9,7 +9,7 @@
 using Primes
 
 # Import functions we're extending
-import Base: +, -, *, ÷, ^, abs, zero, one, show, ==
+import Base: +, -, *, ÷, ^, abs, zero, one, show, ==, <
 
 struct ZModP{T <: Integer, N} <: Integer
     val::T
@@ -57,6 +57,19 @@ end
 
 function ==(a::S, b::ZModP{T, N})::Bool where {T <: Integer, S <: Integer, N}
     return mod(a, N) == b.val
+end
+
+# Comparison operators for display purposes
+function <(a::ZModP{T, N}, b::S) where {T <: Integer, S <: Integer, N}
+    return a.val < mod(b, N)
+end
+
+function <(a::S, b::ZModP{T, N}) where {T <: Integer, S <: Integer, N}
+    return mod(a, N) < b.val
+end
+
+function <(a::ZModP{T, N}, b::ZModP{T, N}) where {T <: Integer, N}
+    return a.val < b.val
 end
 
 # Arithmetic operations

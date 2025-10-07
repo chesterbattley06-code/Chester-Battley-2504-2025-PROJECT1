@@ -95,7 +95,10 @@ rem(::Type{C}, num::P, den::P) where {C, D, P <: Polynomial{C, D}} = last(div_re
 The extended euclid algorithm for polynomials (of the same concrete subtype).
 """
 function extended_euclid_alg(::Type{C}, f::P, g::P) where {C, D, P <: Polynomial{C, D}}
-    return ext_euclid_alg(f, g, rem, div)
+    # Create closures that capture C
+    rem_closure = (a, b) -> rem(C, a, b)
+    div_closure = (a, b) -> div(C, a, b)
+    return ext_euclid_alg(f, g, rem_closure, div_closure)
 end
 
 """

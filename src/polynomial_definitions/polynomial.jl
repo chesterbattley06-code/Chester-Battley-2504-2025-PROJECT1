@@ -13,31 +13,6 @@
 
 """
 An abstract `Polynomial` type, acting as the supertype for all implementations of a polynomial.
-
-
-Introduction:
-The functions defined in this file, and in the folder src/basic_polynomial_operations/abstract
-provide an interface for any subtype of Polynomial. Some operations (e.g. *) can 
-be implemented at the abstract level assuming other functions (e.g. iterate) are implemented for
-the concrete subtypes of Polynomial. This utilises Julia's ability to do multiple dispatch, where
-the compiler can determine the correct function/method to call depending on the type of polynomial
-it is working with.
-
-For any function that is not implemented at the abstract level, see the PolynomialDense struct
-for a particular implementation.
-
-Note: although a function may be implemented correctly at the abstract level, without leveraging 
-the details of the specific implementation the function may be very slow. Consider overriding these
-functions for your concrete subtypes.
-
-
-Constructors:
-We assume that at least the following two constructors exist for a given concrete subtype:
-    `Polynomial()` -> the empty constructor should produce the zero polynomial
-    `Polynomial(vt::Vector{Term})` -> given a vector of terms `vt`, constructs a polynomial with those terms
-
-We assume also that for any concrete subtype of Polynomial, no zero term is stored with degree higher
-than the leading term (ie, we do not store 1 + 2x + x^2 + 0x^3 + 0x^7)
 """
 abstract type Polynomial{C, D} end
 
@@ -289,25 +264,10 @@ end
 """
 A square free polynomial modulo a prime.
 """
-function square_free_mod_p(f::P, prime::Integer) where {C, D, P <: Polynomial{C, D}}
-    fmod_p = mod(f, prime)
-
-    min_deg = last(fmod_p).degree
-    vt = filter(t -> !iszero(t), collect(fmod_p))
-    fmod_p = P( map(t -> Term(t.coeff, t.degree - min_deg), vt) )
-
-    der_fmod_p = mod(derivative(fmod_p), prime)
-    gcd_f_der_f = gcd_mod_p(fmod_p, der_fmod_p, prime)
-
-    iszero(gcd_f_der_f) && return fmod_p * (min_deg > zero(min_deg) ? x_poly(P) : one(P))
-
-    sqr_free = div_mod_p(fmod_p, gcd_f_der_f, prime)
-
-    if min_deg > zero(min_deg) 
-        sqr_free *= x_poly(P)
-    end
-
-    return sqr_free
+function square_free_mod_p(f::P, prime::Integer) where {C <: Integer, D, P <: Polynomial{C, D}}
+    f_mod = to_mod_p(f, prime)
+    result_mod = square_free(ZModP{C, prime}, f_mod)
+    return from_mod_p(result_mod)
 end
 
 #############################
@@ -357,6 +317,45 @@ Multiplication of polynomial and an integer.
 """
 *(p::Polynomial, n::Integer)::Polynomial = Term(n,0)*p
 *(n::Integer, p::Polynomial)::Polynomial = p*n
+
+"""
+Multiplication of polynomial with ZModP coefficients and an integer.
+"""
+function *(p::Polynomial{ZModP{T, N}, D}, n::Integer) where {T <: Integer, N, D}
+    return Term(ZModP(T(n), Val(N)), zero(D)) * p
+end
+
+function *(n::Integer, p::Polynomial{ZModP{T, N}, D}) where {T <: Integer, N, D}
+    return p * n
+end
+
+"""
+Addition of integer and polynomial with ZModP coefficients.
+"""
+function +(n::Integer, p::Polynomial{ZModP{T, N}, D}) where {T <: Integer, N, D}
+    P = typeof(p)
+    n_poly = P([Term(ZModP(T(n), Val(N)), zero(D))])
+    return n_poly + p
+end
+
+function +(p::Polynomial{ZModP{T, N}, D}, n::Integer) where {T <: Integer, N, D}
+    return n + p
+end
+
+"""
+Subtraction of integer and polynomial with ZModP coefficients.
+"""
+function -(n::Integer, p::Polynomial{ZModP{T, N}, D}) where {T <: Integer, N, D}
+    P = typeof(p)
+    n_poly = P([Term(ZModP(T(n), Val(N)), zero(D))])
+    return n_poly - p
+end
+
+function -(p::Polynomial{ZModP{T, N}, D}, n::Integer) where {T <: Integer, N, D}
+    P = typeof(p)
+    n_poly = P([Term(ZModP(T(n), Val(N)), zero(D))])
+    return p - n_poly
+end
 
 """
 Integer division of a polynomial by an integer modulo a prime.
